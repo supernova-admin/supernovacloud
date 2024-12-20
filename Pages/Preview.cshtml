@@ -1,0 +1,258 @@
+@page
+@model CloudFileManager.Pages.PreviewModel
+@{
+    Layout = "_Layout";
+    var file = Model.FileItem;
+    var canPreview = Model.CanPreviewFile && file != null;
+    var fileUrl = file != null ? Url.Content($"~/uploads/{file.PhysicalPath}") : "";
+    var ext = file?.Extension?.ToLower();
+}
+
+<div class="preview-container">
+    <div class="preview-header">
+        <div class="preview-header-left">
+            <h2>@file?.FileName Önizleme</h2>
+            <div class="preview-actions">
+                <a class="btn" href="@Url.Content($"~/uploads/{file?.PhysicalPath}")" download="@file?.FileName">İndir</a>
+                <button class="btn">Favorilere Ekle</button>
+                <button class="btn">Paylaş</button>
+                <button class="btn">Versiyon Geçmişi</button>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@file?.Id" class="delete-form">
+                    <button type="submit" class="btn delete-btn">Sil</button>
+                </form>
+            </div>
+        </div>
+        <div class="preview-header-right">
+            @if (file != null && (ext == ".pdf" || ext == ".png" || ext == ".jpg" || ext == ".jpeg"))
+            {
+                <div class="toolbar">
+                    <button class="icon-btn" onclick="zoomOut()">-</button>
+                    <button class="icon-btn" onclick="zoomIn()">+</button>
+                    <button class="icon-btn" onclick="enterFullscreen()">Tam Ekran</button>
+                    @if (ext == ".pdf")
+                    {
+                        <button class="icon-btn" onclick="prevPage()">Önceki Sayfa</button>
+                        <button class="icon-btn" onclick="nextPage()">Sonraki Sayfa</button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="preview-body">
+        <div class="preview-content">
+            @if (canPreview)
+            {
+                if (ext == ".pdf")
+                {
+                    <iframe id="previewFrame" src="@fileUrl" style="width:100%; height:calc(100vh - 120px); border:none;"></iframe>
+                }
+                else if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+                {
+                    <div class="image-container">
+                        <img id="previewImage" src="@fileUrl" alt="@file.FileName" style="max-width:100%;"/>
+                    </div>
+                }
+                else if (ext == ".txt")
+                {
+                    <iframe src="@fileUrl" style="width:100%; height:calc(100vh - 120px); border:none;"></iframe>
+                }
+            }
+            else
+            {
+                <p>Bu dosya önizlenemiyor. İndirmek için <a href="@Url.Content($"~/uploads/{file?.PhysicalPath}")" download="@file?.FileName">tıklayın</a>.</p>
+            }
+        </div>
+
+        <aside class="preview-sidebar">
+            <h3>Dosya Bilgileri</h3>
+            @if (file != null)
+            {
+                <ul>
+                    <li><strong>Ad:</strong> @file.FileName</li>
+                    <li><strong>Boyut:</strong> @($"{file.Size / 1024.0:F2} KB")</li>
+                    <li><strong>Oluşturulma:</strong> @file.CreatedAt</li>
+                    <li><strong>Güncellenme:</strong> @file.UpdatedAt</li>
+                    <li><strong>Uzantı:</strong> @file.Extension</li>
+                </ul>
+                <h4>Versiyonlar</h4>
+                <ul>
+                    <li>Versiyon 1 (01.01.2024)</li>
+                    <li>Versiyon 2 (03.01.2024)</li>
+                </ul>
+            }
+
+            <h4>Etiketler</h4>
+            <div class="tags">
+                <span class="tag">Proje</span>
+                <span class="tag">Önemli</span>
+            </div>
+
+            <button class="icon-btn help-btn" onclick="toggleShortcuts()">Kısayollar</button>
+            <div id="shortcuts-help" style="display:none; margin-top:10px;">
+                <p><strong>Klavye Kısayolları:</strong></p>
+                <ul>
+                    <li>F: Tam ekran</li>
+                    <li>+ / - : Yakınlaştır / Uzaklaştır</li>
+                    <li>← / → : Sayfa Değiştir (PDF)</li>
+                    <li>Esc: Tam ekrandan çık</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function zoomIn() {
+            alert("Yakınlaştırma özelliği henüz uygulanmadı.");
+        }
+
+        function zoomOut() {
+            alert("Uzaklaştırma özelliği henüz uygulanmadı.");
+        }
+
+        function enterFullscreen() {
+            alert("Tam ekran özelliği henüz uygulanmadı.");
+        }
+
+        function prevPage() {
+            alert("PDF için önceki sayfa işlevi henüz uygulanmadı.");
+        }
+
+        function nextPage() {
+            alert("PDF için sonraki sayfa işlevi henüz uygulanmadı.");
+        }
+
+        function toggleShortcuts() {
+            var help = document.getElementById("shortcuts-help");
+            if (help.style.display === "none") {
+                help.style.display = "block";
+            } else {
+                help.style.display = "none";
+            }
+        }
+    </script>
+}
+
+<style>
+.preview-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+}
+
+.preview-header-left h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.preview-actions {
+    margin-top: 5px;
+}
+
+.preview-actions .btn {
+    margin-right: 10px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.preview-actions .btn:hover {
+    background: #e0e0e0;
+}
+
+.preview-actions .delete-btn {
+    background: #e57373;
+    color: #fff;
+}
+
+.preview-actions .delete-btn:hover {
+    background: #d32f2f;
+}
+
+.preview-header-right .toolbar {
+    display: flex;
+    gap: 5px;
+}
+
+.icon-btn {
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: #e0e0e0;
+}
+
+.preview-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.preview-content {
+    flex: 3;
+    overflow: auto;
+    padding: 20px;
+}
+
+.preview-sidebar {
+    flex: 1;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    padding: 20px;
+    overflow: auto;
+}
+
+.preview-sidebar h3, .preview-sidebar h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.preview-sidebar ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 15px 0;
+}
+
+.preview-sidebar li {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.preview-sidebar .tags {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.tag {
+    background: #e0f7fa;
+    color: #333;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.help-btn {
+    margin-top: 10px;
+}
+</style>

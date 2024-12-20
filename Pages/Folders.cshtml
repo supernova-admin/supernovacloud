@@ -1,0 +1,21 @@
+@page
+@model CloudFileManager.Pages.FoldersModel
+@{
+    Layout = "_Layout";
+}
+
+<h2>Klasörler</h2>
+@if (Model.CurrentFolderId.HasValue)
+{
+    <p><a href="/Folders">Geri Dön</a></p>
+}
+
+<form method="post">
+    <input type="hidden" name="folderId" value="@Model.CurrentFolderId" />
+    <input type="text" name="NewFolderName" placeholder="Yeni Klasör Adı" />
+    <button type="submit">Oluştur</button>
+</form>
+
+<div id="folder-list">
+    @await Html.PartialAsync("_FolderListPartial", Model.Folders)
+</div>

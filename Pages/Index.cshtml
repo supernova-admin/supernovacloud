@@ -1,0 +1,247 @@
+@page
+@model CloudFileManager.Pages.IndexModel
+@{
+    Layout = "_Layout";
+    var selectedNameAttr = Model.SortOption == "name" ? "selected" : "";
+    var selectedDateAttr = Model.SortOption == "date" ? "selected" : "";
+}
+
+<h2>Dosyalar</h2>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="notification">
+        @Model.Message
+    </div>
+}
+
+<!-- Yeni Menü -->
+<div class="fixed-menu">
+    <form method="get" class="search-form">
+        <input type="hidden" name="folderId" value="@Model.CurrentFolderId" />
+        <input type="text" class="search-input" name="search" placeholder="Ada göre ara" value="@Model.SearchQuery" />
+        <select name="ext" class="sort-select">
+            <option value="">Türe Göre Filtrele</option>
+            @foreach (var ext in Model.AvailableExtensions)
+            {
+                <option value="@ext" selected="@(Model.ExtensionFilter == ext)">@Model.GetFriendlyName(ext)</option>
+            }
+        </select>
+        <select name="sort" class="sort-select">
+            <option value="">Sıralama Yok</option>
+            <option value="name" selected="@(Model.SortOption == "name")">Ada Göre</option>
+            <option value="date" selected="@(Model.SortOption == "date")">Tarihe Göre</option>
+        </select>
+        <button type="submit" class="search-btn">Ara</button>
+    </form>
+    <div class="menu-actions">
+        <button class="menu-btn" onclick="openCreateFolderPopup()">📁 Klasör Oluştur</button>
+        <button class="menu-btn" onclick="openUploadFilePopup()">📤 Dosya Yükle</button>
+    </div>
+</div>
+
+<!-- Klasör Oluşturma Pop-up -->
+<div id="createFolderPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closeCreateFolderPopup()">&times;</span>
+        <h3>Yeni Klasör Oluştur</h3>
+        <form method="post" asp-page-handler="CreateFolder">
+            <input type="text" name="NewFolderName" placeholder="Yeni klasör adı" class="folder-input" />
+            <button type="submit" class="folder-btn">Oluştur</button>
+        </form>
+    </div>
+</div>
+
+<!-- Dosya Yükleme Pop-up -->
+<div id="uploadFilePopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closeUploadFilePopup()">&times;</span>
+        <h3>Dosya Yükle</h3>
+        <form method="post" enctype="multipart/form-data" asp-page-handler="Upload">
+            <input type="file" name="FilesToUpload" multiple class="upload-input" />
+            <button type="submit" class="upload-btn">Yükle</button>
+        </form>
+    </div>
+</div>
+
+@if (Model.Files != null && Model.Files.Count > 0)
+{
+    <div class="card-grid">
+        @foreach (var file in Model.Files)
+        {
+            <div class="file-card">
+                <a href="@Url.Page("Preview", new { id = file.Id })">
+                    <img src="~/icons/@Model.GetIconForFileType(file.Extension)" alt="File Icon" />
+                    <div class="file-name">@file.FileName</div>
+                </a>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@file.Id" asp-route-folderId="@Model.CurrentFolderId" class="delete-form">
+                    <button type="submit" class="delete-btn">Sil</button>
+                </form>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>Henüz herhangi bir dosya bulunmuyor.</p>
+}
+
+@section Scripts {
+    <script>
+        function openCreateFolderPopup() {
+            document.getElementById("createFolderPopup").style.display = "block";
+        }
+
+        function closeCreateFolderPopup() {
+            document.getElementById("createFolderPopup").style.display = "none";
+        }
+
+        function openUploadFilePopup() {
+            document.getElementById("uploadFilePopup").style.display = "block";
+        }
+
+        function closeUploadFilePopup() {
+            document.getElementById("uploadFilePopup").style.display = "none";
+        }
+    </script>
+}
+
+<style>
+.notification {
+    background:#e0f7fa;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+
+.fixed-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 10px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-input, .sort-select {
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.search-btn {
+    background: #42a5f5;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    background: #1e88e5;
+}
+
+.menu-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.menu-btn {
+    background: #42a5f5;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+}
+
+.menu-btn:hover {
+    background: #1e88e5;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.file-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333;
+}
+
+.file-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.file-card img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+.file-name {
+    font-size: 0.9rem;
+    word-wrap: break-word;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.popup-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>

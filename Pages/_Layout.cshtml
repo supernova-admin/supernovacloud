@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cloud File Manager</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <!-- Apple tarzı font kullanımı için (SF Pro) alternatif olarak Roboto/Nunito gibi fontlar da kullanılabilir -->
+    <!-- Eğer SF Pro kullanmak isterseniz, resmi olarak Apple platformlarına özel olabilir. Alternatif: Inter, Nunito -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600&display=swap" />
+</head>
+<body>
+    <header class="top-nav">
+        <div class="logo">
+            <!-- Logo veya Proje Adı -->
+            <span>CloudDrive</span>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Ara..." />
+        </div>
+        <div class="top-nav-right">
+            <button class="icon-button" title="Ayarlar">
+                <img src="~/icons/settings.svg" alt="Settings" />
+            </button>
+            <div class="profile-pic">
+                <img src="~/images/profile-placeholder.png" alt="Profile" />
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="/"><img src="~/icons/folder.svg" alt="" /> Tüm Dosyalar</a></li>
+                <li><a href="/Favorites"><img src="~/icons/star.svg" alt="" /> Favoriler</a></li>
+                <li><a href="/Shared"><img src="~/icons/share.svg" alt="" /> Paylaşılanlar</a></li>
+                <li><a href="/Recent"><img src="~/icons/time.svg" alt="" /> Son Yüklenenler</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content">
+        @RenderBody()
+    </main>
+
+    <!-- Yükleme / Oluşturma Butonu -->
+    <div class="floating-action">
+        <button class="floating-btn" title="Yeni Dosya Yükle" onclick="document.getElementById('fileUploadInput').click();">
+            <img src="~/icons/plus.svg" alt="Plus"/>
+            <span>Dosya Yükle</span>
+        </button>
+        <input type="file" id="fileUploadInput" style="display:none;" />
+    </div>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,13 @@
+@page
+@model CloudFileManager.Pages.EditModel
+@{
+    Layout = "_Layout";
+}
+<h2>Dosya Adını Düzenle</h2>
+<form method="post">
+    <div>
+        <label>Dosya Adı:</label>
+        <input type="text" name="FileItem.FileName" value="@Model.FileItem.FileName" />
+    </div>
+    <button type="submit">Kaydet</button>
+</form>

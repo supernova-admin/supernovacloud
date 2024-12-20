@@ -1,0 +1,8 @@
+@model List<CloudFileManager.Models.FolderItem>
+
+<ul>
+@foreach(var folder in Model)
+{
+    <li><a href="/Folders?folderId=@folder.Id">@folder.FolderName</a></li>
+}
+</ul>
